@@ -1,6 +1,9 @@
 # Docker Exim Relay Image
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Layers](https://images.microbadger.com/badges/image/industrieco/exim-relay.svg)](https://microbadger.com/images/industrieco/exim-relay/)
+[![GitHub Tag](https://img.shields.io/github/tag/industrieco/docker-exim-relay.svg)](https://registry.hub.docker.com/u/industrieco/docker-exim-relay/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/industrieco/exim-relay.svg)](https://registry.hub.docker.com/u/industrieco/exim-relay/)
 
 A light weight Docker image for an Exim mail relay, based on the official Alpine image.
 
@@ -18,7 +21,7 @@ docker run \
        --restart always \
        -h my.host.name \
        -d \
-       -p 25:10025 \
+       -p 25:8025 \
        industrieco/exim-relay
 ```
 
