@@ -34,7 +34,7 @@ docker run \
        --restart always \
        -h my.host.name \
        -d \
-       -p 25:10025 \
+       -p 25:8025 \
        -e SMARTHOST=some.relayhost.name \
        -e SMTP_USERNAME=someuser \
        -e SMTP_PASSWORD=password \
@@ -50,7 +50,7 @@ version: "2"
       image: industrieco/exim-relay
       restart: always
       ports:
-        - "25:10025"
+        - "25:8025"
       hostname: my.host.name
       environment:
         - SMARTHOST=some.relayhost.name
