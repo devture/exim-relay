@@ -79,6 +79,13 @@ version: "2"
 * Setting both RELAY_FROM_HOSTS and RELAY_TO_DOMAINS to "\*" will make this an open relay
 * Setting both RELAY_FROM_HOSTS and RELAY_TO_DOMAINS to other values will limit which clients can send and who they can send to
 
+###### RELAY_TO_USERS
+
+* A whitelist (colon separated) of recipient email addresses to allow relay to
+* This list is processed in addition to the domains in RELAY_TO_DOMAINS
+* Use this for more precise whitelisting of relayable mail
+* Defaults to "" which doesn't whitelist any addresses
+
 ###### SMARTHOST
 
 * A relay host to forward all non-local email through
