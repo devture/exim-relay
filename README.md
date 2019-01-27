@@ -1,10 +1,18 @@
 # Docker Exim Relay Image
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Layers](https://images.microbadger.com/badges/image/industrieco/exim-relay.svg)](https://microbadger.com/images/industrieco/exim-relay/) [![GitHub Tag](https://img.shields.io/github/tag/industrieco/docker-exim-relay.svg)](https://registry.hub.docker.com/u/industrieco/docker-exim-relay/) [![Docker Pulls](https://img.shields.io/docker/pulls/industrieco/exim-relay.svg)](https://registry.hub.docker.com/u/industrieco/exim-relay/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Layers](https://images.microbadger.com/badges/image/devture/exim-relay.svg)](https://microbadger.com/images/devture/exim-relay/) [![GitHub Tag](https://img.shields.io/github/tag/devture/exim-relay.svg)](https://registry.hub.docker.com/u/devture/exim-relay/) [![Docker Pulls](https://img.shields.io/docker/pulls/devture/exim-relay.svg)](https://registry.hub.docker.com/u/devture/exim-relay/)
 
-A light weight Docker image for an Exim mail relay, based on the official Alpine image.
+A lightweight Docker image for an [Exim](https://www.exim.org/) mail relay, based on the official Alpine image.
 
-For extra security, the container runs as exim not root.
+For extra security, the container runs as exim (`uid=100` and `gid=101`), not root.
+
+This is a fork of [Industrie&Co](https://github.com/industrieco)'s wonderful (but seemingly unmaintained) [industrieco/docker-exim-relay](https://github.com/industrieco/docker-exim-relay) image.
+The following changes have been done on top of it:
+
+- based on a newer Alpine release (and thus, newer exim)
+
+- removing Received headers for mail received by exim (helps email deliverability)
+
 
 ## Docker
 
@@ -14,12 +22,13 @@ This will allow relay from all private address ranges and will relay directly to
 
 ```
 docker run \
+       --user=100:101 \
        --name smtp \
        --restart always \
        -h my.host.name \
        -d \
        -p 25:8025 \
-       industrieco/exim-relay
+       devture/exim-relay
 ```
 
 ### Smarthost setup
@@ -28,14 +37,15 @@ To send forward outgoing email to a smart relay host
 
 ```
 docker run \
+       --user=100:101 \
        --restart always \
        -h my.host.name \
        -d \
        -p 25:8025 \
-       -e SMARTHOST=some.relayhost.name \
+       -e SMARTHOST=some.relayhost.name::587 \
        -e SMTP_USERNAME=someuser \
        -e SMTP_PASSWORD=password \
-       industrieco/exim-relay
+       devture/exim-relay
 ```
 
 ## Docker Compose
@@ -44,13 +54,14 @@ docker run \
 version: "2"
   services:
     smtp:
-      image: industrieco/exim-relay
+      image: devture/exim-relay
+      user: 100:101
       restart: always
       ports:
         - "25:8025"
       hostname: my.host.name
       environment:
-        - SMARTHOST=some.relayhost.name
+        - SMARTHOST=some.relayhost.name::587
         - SMTP_USERNAME=someuser
         - SMTP_PASSWORD=password
 ```
