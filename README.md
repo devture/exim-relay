@@ -94,6 +94,10 @@ version: "2"
 * Use this for more precise whitelisting of relayable mail
 * Defaults to "" which doesn't whitelist any addresses
 
+###### DISABLE_SENDER_VERIFICATION
+
+If the environment variable is set, sender address verification will be disabled.
+
 ###### SMARTHOST
 
 * A relay host to forward all non-local email through
@@ -105,6 +109,7 @@ version: "2"
 ###### SMTP_PASSWORD
 
 * The password for authentication to the smarthost - leave this blank to disable authenticaion
+
 
 ## Docker Secrets
 
