@@ -23,4 +23,4 @@ ENV LOCAL_DOMAINS=@ \
     SMTP_USERDOMAIN= \
     SMTP_USERNAME=
 
-ENTRYPOINT ["exim", "-bdf", "-q15m"]
+CMD ["exim", "-bdf", "-q15m"]

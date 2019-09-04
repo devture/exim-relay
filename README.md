@@ -24,6 +24,7 @@ This will allow relay from all private address ranges and will relay directly to
 docker run \
        --user=100:101 \
        --name smtp \
+       --init \
        --restart always \
        -h my.host.name \
        -d \
@@ -38,6 +39,8 @@ To send forward outgoing email to a smart relay host
 ```
 docker run \
        --user=100:101 \
+       --name smtp \
+       --init \
        --restart always \
        -h my.host.name \
        -d \
@@ -51,11 +54,12 @@ docker run \
 ## Docker Compose
 
 ```
-version: "2"
+version: "3.7"
   services:
     smtp:
       image: devture/exim-relay
       user: 100:101
+      init: true
       restart: always
       ports:
         - "25:8025"
