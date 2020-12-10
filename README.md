@@ -26,11 +26,14 @@ docker run \
        --name smtp \
        --init \
        --restart always \
-       -h my.host.name \
+       --hostname=my.host.name \
        -d \
        -p 25:8025 \
        devture/exim-relay
 ```
+
+**Note**: the hostname you pass to `--hostname` gets set in the container (which is nice), but since Docker 20.10, also has the side-effect of making other services on the same Docker network resolve said hostname to the in-container IP address of the mailer container. If you'd rather this hostname resolves to the actual public IP address, you may wish to avoid using a real hostname for it.
+
 
 ### Smarthost setup
 
@@ -42,7 +45,7 @@ docker run \
        --name smtp \
        --init \
        --restart always \
-       -h my.host.name \
+       --hostname=my.host.name \
        -d \
        -p 25:8025 \
        -e SMARTHOST=some.relayhost.name::587 \
