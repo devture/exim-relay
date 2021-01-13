@@ -26,13 +26,13 @@ docker run \
        --name smtp \
        --init \
        --restart always \
-       --hostname=my.host.name \
+       -e HOSTNAME=my.host.name \
        -d \
        -p 25:8025 \
        devture/exim-relay
 ```
 
-**Note**: the hostname you pass to `--hostname` gets set in the container (which is nice), but since Docker 20.10, also has the side-effect of making other services on the same Docker network resolve said hostname to the in-container IP address of the mailer container. If you'd rather this hostname resolves to the actual public IP address, you may wish to avoid using a real hostname for it.
+**Note**: we advise setting the hostname using a `HOSTNAME` environment variable, instead of `--hostname`. Since Docker 20.10, the latter has the side-effect of making other services on the same Docker network resolve said hostname to the in-container IP address of the mailer container. If you'd rather this hostname resolves to the actual public IP address, avoid using `--hostname`.
 
 
 ### Smarthost setup
@@ -45,9 +45,9 @@ docker run \
        --name smtp \
        --init \
        --restart always \
-       --hostname=my.host.name \
        -d \
        -p 25:8025 \
+       -e HOSTNAME=my.host.name \
        -e SMARTHOST=some.relayhost.name::587 \
        -e SMTP_USERNAME=someuser \
        -e SMTP_PASSWORD=password \
@@ -66,14 +66,18 @@ version: "3.7"
       restart: always
       ports:
         - "25:8025"
-      hostname: my.host.name
       environment:
-        - SMARTHOST=some.relayhost.name::587
-        - SMTP_USERNAME=someuser
-        - SMTP_PASSWORD=password
+        HOSTNAME=my.host.name
+        SMARTHOST=some.relayhost.name::587
+        SMTP_USERNAME=someuser
+        SMTP_PASSWORD=password
 ```
 
 ## Other Variables
+
+###### HOSTNAME
+
+* The hostname that is sent as part of the `HELO` message.
 
 ###### LOCAL_DOMAINS
 

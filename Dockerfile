@@ -1,4 +1,4 @@
-FROM alpine:3.12
+FROM docker.io/alpine:3.12
 
 RUN apk --no-cache add exim && \
     mkdir /var/spool/exim && \
@@ -18,6 +18,7 @@ ENV LOCAL_DOMAINS=@ \
     RELAY_TO_DOMAINS=* \
     RELAY_TO_USERS= \
     DISABLE_SENDER_VERIFICATION= \
+    HOSTNAME= \
     SMARTHOST= \
     SMTP_PASSWORD= \
     SMTP_USERDOMAIN= \
