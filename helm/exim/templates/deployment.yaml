@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "exim.fullname" . }}
+  labels:
+    app: {{ template "exim.name" . }}
+    chart: {{ template "exim.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "exim.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "exim.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "exim.serviceAccountName" . }}
+      containers:
+      - name: {{ template "exim.name" . }}
+        image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: SMARTHOST
+          valueFrom:
+            configMapKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-relay-host
+        - name: HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-relay-hostname
+        - name: RELAY_FROM_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-relay-from-hosts
+        - name: SMTP_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-relay-username
+        - name: SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-relay-password
+        - name: RELAY_TO_DOMAINS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-relay-to-domains
+        - name: LOCAL_DOMAINS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-local-domains
+        - name: RELAY_TO_USERS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-relay-to-users
+        - name: DISABLE_SENDER_VERIFICATION
+          valueFrom:
+            configMapKeyRef:
+              name: {{ template "exim.fullname" . }}
+              key: smtp-relay-disable-sender-verification
+        ports:
+          - name: smtp
+            containerPort: 25
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

@@ -1,0 +1,72 @@
+# Default values for exim.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# High availability
+replicaCount: 2
+
+# Role Based Access Control
+# Ref: https://kubernetes.io/docs/admin/authorization/rbac/
+rbac:
+  create: true
+  role:
+    ## Rules to create. It follows the role specification
+    rules:
+    - apiGroups:
+      - ''
+      resources:
+      - services
+      - endpoints
+      - pods
+      verbs:
+      - get
+      - watch
+      - list
+
+# Service Account
+# Ref: https://kubernetes.io/docs/admin/service-accounts-admin/
+serviceAccount:
+  create: true
+  ## The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the fullname template
+  name:
+
+# Docker image
+image:
+  repository: lbitonti/exim-relay
+  tag: 0.2
+  pullPolicy: IfNotPresent
+
+# Expose pods with service on port 25
+service:
+  type: ClusterIP 
+  port: 25
+
+# SMTP server details
+# Used by exim to connect to SMTP server
+smtp:
+  # Example with example
+  relayHost: "smtp.example.com::587"
+  relayHostname: "my.host.local"
+  relayFromHosts: "10.0.0.0/8,127.0.0.0/8,172.17.0.0/16,192.0.0.0/8"
+  relayUsername: "relayuser"
+  relayPassword: "relaypassword" 
+  relayToDomains: "*" 
+  localDomains: "" 
+  relayToUsers: ""
+  relayDisableSenderVerification: false
+
+# Resources needed for the pods
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

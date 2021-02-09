@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "exim.fullname" . }}
+  labels:
+    app: {{ template "exim.name" . }}
+    chart: {{ template "exim.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  smtp-relay-host: '{{ .Values.smtp.relayHost }}'
+  smtp-relay-hostname: '{{ .Values.smtp.relayHostname }}'
+  smtp-relay-from-hosts: '{{ .Values.smtp.relayFromHosts }}'
+  smtp-local-domains: '{{ .Values.smtp.localDomains }}'
+  smtp-relay-username: '{{ .Values.smtp.relayUsername }}'
+  smtp-relay-to-domains: '{{ .Values.smtp.relayToDomains }}'
+  smtp-relay-to-users: '{{ .Values.smtp.relayToUsers }}'
+  smtp-relay-disable-sender-verification: '{{ .Values.smtp.relayDisableSenderVerification }}'

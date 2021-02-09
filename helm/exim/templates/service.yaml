@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "exim.fullname" . }}
+  labels:
+    app: {{ template "exim.name" . }}
+    chart: {{ template "exim.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: {{ .Values.service.type }}
+  {{ if and (eq .Values.service.type "LoadBalancer") (.Values.service.loadBalancerIP) }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  {{ end }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: 8025
+      name: smtp
+      {{ if and (eq .Values.service.type "NodePort") (.Values.service.nodePort) }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{ end }}
+  selector:
+    app: {{ template "exim.name" . }}
+    release: {{ .Release.Name }}

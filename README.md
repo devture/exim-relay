@@ -143,3 +143,27 @@ Exim commands can be run to check the status of the mail server as well
 ```shell
 docker exec -ti smtp exim -bp
 ```
+
+## Helm Chart
+The Helm Chart in [helm/exim-relay](helm/exim-relay) can be used to deploy into a Kubernetes cluster.
+
+The Chart will deploy by default 2 pods load balanced with a service and expose port 25.
+
+This can all be configured using the following variables (see also [helm/exim-relay](helm/exim-relay))
+
+### Configuration
+
+The following table lists the configurable parameters of the chart and their default values (see variables section for a description).
+
+| Parameter                  | Variable         | Default  |
+| -------------------------- | ---------------- | ----- |
+| `relayHost`                | SMARTHOST        | `smtp.example.com::587` |
+| `relayHostname`            | HOSTNAME         | `my.host.local`|
+| `relayFromHosts`           | RELAY_FROM_HOSTS | `10.0.0.0/8,127.0.0.0/8,172.17.0.0/16,192.0.0.0/8` |
+| `relayUsername`            | SMTP_USERNAME    | `relayuser` | 
+| `relayPassword`            | SMTP_PASSWORD    | `relaypassword` |
+| `relayToDomains`           | RELAY_TO_DOMAINS | `*`|
+| `localDomains`             | LOCAL_DOMAINS    | ``|
+| `relayToUsers`             | RELAY_TO_USERS   | ``|
+| `relayDisableSenderVerification` | DISABLE_SENDER_VERIFICATION | `false` |
+

@@ -1,0 +1,9 @@
+apiVersion: v1
+version: 0.1.0
+appVersion: 0.2
+description: A Helm chart for a highly available exim relay in Kubernetes
+name: exim
+keywords:
+- exim
+sources:
+- https://github.com/devture/exim-relay
