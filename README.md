@@ -67,10 +67,10 @@ version: "3.7"
       ports:
         - "25:8025"
       environment:
-        HOSTNAME=my.host.name
-        SMARTHOST=some.relayhost.name::587
-        SMTP_USERNAME=someuser
-        SMTP_PASSWORD=password
+        HOSTNAME: my.host.name
+        SMARTHOST: some.relayhost.name::587
+        SMTP_USERNAME: someuser
+        SMTP_PASSWORD: password
 ```
 
 ## Other Variables
