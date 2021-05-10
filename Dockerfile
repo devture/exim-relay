@@ -1,6 +1,6 @@
 FROM docker.io/alpine:3.13
 
-RUN apk --no-cache add exim && \
+RUN apk --no-cache add exim tini && \
     mkdir /var/spool/exim && \
     chmod 777 /var/spool/exim && \
     ln -sf /dev/stdout /var/log/exim/mainlog && \
@@ -24,4 +24,5 @@ ENV LOCAL_DOMAINS=@ \
     SMTP_USERDOMAIN= \
     SMTP_USERNAME=
 
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["exim", "-bdf", "-q15m"]
