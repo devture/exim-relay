@@ -56,18 +56,19 @@ docker run \
 
 ```
 version: "3.7"
-  services:
-    smtp:
-      image: docker.io/devture/exim-relay:SOME_TAGGED_RELEASE
-      user: 100:101
-      restart: always
-      ports:
-        - "25:8025"
-      environment:
-        HOSTNAME: my.host.name
-        SMARTHOST: some.relayhost.name::587
-        SMTP_USERNAME: someuser
-        SMTP_PASSWORD: password
+
+services:
+  smtp:
+    image: docker.io/devture/exim-relay:SOME_TAGGED_RELEASE
+    user: 100:101
+    restart: always
+    ports:
+      - "25:8025"
+    environment:
+      HOSTNAME: my.host.name
+      SMARTHOST: some.relayhost.name::587
+      SMTP_USERNAME: someuser
+      SMTP_PASSWORD: password
 ```
 
 ## Other Variables
