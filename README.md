@@ -1,6 +1,6 @@
 # Docker Exim Relay Image
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Layers](https://images.microbadger.com/badges/image/devture/exim-relay.svg)](https://microbadger.com/images/devture/exim-relay/) [![GitHub Tag](https://img.shields.io/github/tag/devture/exim-relay.svg)](https://registry.hub.docker.com/u/devture/exim-relay/) [![Docker Pulls](https://img.shields.io/docker/pulls/devture/exim-relay.svg)](https://registry.hub.docker.com/u/devture/exim-relay/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![GitHub Tag](https://img.shields.io/github/tag/devture/exim-relay.svg)](https://hub.docker.com/r/devture/exim-relay/) [![Docker Pulls](https://img.shields.io/docker/pulls/devture/exim-relay.svg)](https://hub.docker.com/r/devture/exim-relay/)
 
 A lightweight Docker image for an [Exim](https://www.exim.org/) mail relay, based on the official Alpine image.
 
