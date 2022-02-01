@@ -10,6 +10,12 @@ RUN apk --no-cache add exim tini && \
 
 COPY exim.conf /etc/exim/exim.conf
 
+# Regardless of the permissions of the original `exim.conf` file in the build context,
+# ensure that the `/etc/exim/exim.conf` configuration file is not writable by the Exim user.
+# Otherwise, we'll get an Exim panic:
+# > Exim configuration file /etc/exim/exim.conf has the wrong owner, group, or mode
+RUN chmod 664 /etc/exim/exim.conf
+
 USER exim
 EXPOSE 8025
 
