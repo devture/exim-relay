@@ -52,6 +52,25 @@ docker run \
        docker.io/devture/exim-relay:SOME_TAGGED_RELEASE
 ```
 
+### DKIM setup
+
+To sign outgoing email with DKIM
+
+```
+docker run \
+       --user=100:101 \
+       --name smtp \
+       --restart always \
+       -d \
+       -p 25:8025 \
+       -e HOSTNAME=my.host.name \
+       -e SMARTHOST=some.relayhost.name::587 \
+       -e SMTP_USERNAME=someuser \
+       -e SMTP_PASSWORD=password \
+       --mount type=bind,src=/PATH/TO/THE/PRIVATE/KEY.pem,dst=/etc/exim/dkim.pem,ro \ 
+       docker.io/devture/exim-relay:SOME_TAGGED_RELEASE
+```
+
 ## Docker Compose
 
 ```
