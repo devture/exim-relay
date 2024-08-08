@@ -8,7 +8,7 @@ variables:
 
 services:
   docker:
-    image: docker:24.0.7-dind
+    image: docker:27.1.1-dind
     commands:
       - dockerd --tls=false --host=tcp://0.0.0.0:2376
     privileged: true
