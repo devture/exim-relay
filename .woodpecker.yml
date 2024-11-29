@@ -4,7 +4,7 @@ variables:
   - &repo 'docker.io/devture/exim-relay'
   - &dockerfile 'Dockerfile'
   - &platforms 'linux/amd64,linux/arm64/v8,linux/arm/v7'
-  - &builder_image woodpeckerci/plugin-docker-buildx:4.2.0
+  - &builder_image woodpeckerci/plugin-docker-buildx:5.0.0
 
 services:
   docker:
