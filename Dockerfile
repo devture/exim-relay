@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.20.2
+FROM docker.io/alpine:3.20.3
 
 RUN apk --no-cache add exim tini && \
     mkdir /var/spool/exim && \
