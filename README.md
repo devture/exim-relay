@@ -28,7 +28,7 @@ docker run \
        -e HOSTNAME=my.host.name \
        -d \
        -p 25:8025 \
-       docker.io/devture/exim-relay:SOME_TAGGED_RELEASE
+       ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
 ```
 
 **Note**: we advise setting the hostname using a `HOSTNAME` environment variable, instead of `--hostname`. Since Docker 20.10, the latter has the side-effect of making other services on the same Docker network resolve said hostname to the in-container IP address of the mailer container. If you'd rather this hostname resolves to the actual public IP address, avoid using `--hostname`.
@@ -49,7 +49,7 @@ docker run \
        -e SMARTHOST=some.relayhost.name::587 \
        -e SMTP_USERNAME=someuser \
        -e SMTP_PASSWORD=password \
-       docker.io/devture/exim-relay:SOME_TAGGED_RELEASE
+       ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
 ```
 
 ### DKIM setup
@@ -67,8 +67,8 @@ docker run \
        -e SMARTHOST=some.relayhost.name::587 \
        -e SMTP_USERNAME=someuser \
        -e SMTP_PASSWORD=password \
-       --mount type=bind,src=/PATH/TO/THE/PRIVATE/KEY.pem,dst=/etc/exim/dkim.pem,ro \ 
-       docker.io/devture/exim-relay:SOME_TAGGED_RELEASE
+       --mount type=bind,src=/PATH/TO/THE/PRIVATE/KEY.pem,dst=/etc/exim/dkim.pem,ro \
+       ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
 ```
 
 ## Docker Compose
@@ -78,7 +78,7 @@ version: "3.7"
 
 services:
   smtp:
-    image: docker.io/devture/exim-relay:SOME_TAGGED_RELEASE
+    image: ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
     user: 100:101
     restart: always
     ports:
