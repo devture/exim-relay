@@ -104,9 +104,11 @@ services:
 
 ###### RELAY_FROM_HOSTS
 
-* A list (colon separated) of subnets to allow relay from
+* A list prefixed with `<; `, which contains `;`-separated IPv4/IPv6 subnets to allow relay from (see the default value below for an example)
 * Set to "\*" to allow any host to relay - use this with RELAY_TO_DOMAINS to allow any client to relay to a list of domains
-* Defaults to private address ranges: 10.0.0.0/8:172.16.0.0/12:192.168.0.0/16
+* Defaults value: `<; 10.0.0.0/8; 172.16.0.0/12; 192.168.0.0/16; fc00::/7`
+
+💡 Lists in exim use `:` as a value separator by default. Since IPv6 addresses are written with `:` inside them, we override the default separator by adding the `<; ` prefix. This allows for `:` to be used in IP address ranges without being interpreted as a separator.
 
 ###### RELAY_TO_DOMAINS
 
