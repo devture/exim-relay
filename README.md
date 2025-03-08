@@ -71,6 +71,8 @@ docker run \
        ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
 ```
 
+You can adjust the [DKIM selector](https://dmarcly.com/blog/what-is-dkim-selector-and-how-does-it-work-dkim-selector-explained) value by passing an additional `DKIM_SELECTOR` environment variable. By default, it has a value of `default`.
+
 ## Docker Compose
 
 ```
