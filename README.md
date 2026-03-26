@@ -52,25 +52,6 @@ docker run \
        ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
 ```
 
-### Smarthost setup with implicit TLS (SMTPS, port 465)
-
-For providers that require implicit TLS instead of STARTTLS ([RFC 8314](https://www.rfc-editor.org/rfc/rfc8314)):
-
-```
-docker run \
-       --user=100:101 \
-       --name smtp \
-       --restart always \
-       -d \
-       -p 25:8025 \
-       -e HOSTNAME=my.host.name \
-       -e SMARTHOST=some.relayhost.name::465 \
-       -e SMARTHOST_PROTOCOL=smtps \
-       -e SMTP_USERNAME=someuser \
-       -e SMTP_PASSWORD=password \
-       ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
-```
-
 ### DKIM setup
 
 To sign outgoing email with DKIM
@@ -152,13 +133,6 @@ If the environment variable is set, sender address verification will be disabled
 ###### SMARTHOST
 
 * A relay host to forward all non-local email through
-
-###### SMARTHOST_PROTOCOL
-
-* The protocol to use when connecting to the smarthost
-* Set to `smtps` for implicit TLS (RFC 8314); use together with port 465 in `SMARTHOST`
-* Defaults to `smtp` (STARTTLS)
-* Example: `SMARTHOST_PROTOCOL=smtps` together with `SMARTHOST=smtp.example.com::465`
 
 ###### SMTP_USERNAME
 
