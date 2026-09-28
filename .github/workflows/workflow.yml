@@ -1,40 +1,107 @@
-name: CI (main and tags)
+name: Release
 on:
   push:
     branches: [ "main" ]
-    tags: [ "*" ]
+  # Alpine may start offering a new exim package without anything changing
+  # here, so check for one regularly. Nothing gets built if there is none.
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
 permissions:
-  contents: read
+  contents: write  # to push tags
   packages: write
 jobs:
-  build-publish:
-    name: Build and Publish
+  release:
+    name: Build, publish and tag
     runs-on: ubuntu-latest
+    # A manual run from another branch must not publish `latest` or tags.
+    if: github.ref == 'refs/heads/main'
+
+    # Tag numbers are derived from the tags that already exist, so two runs
+    # must not compute them simultaneously - they would both arrive at the same
+    # number. Runs are queued rather than cancelled, so that every commit
+    # deserving a release still gets one.
+    concurrency:
+      group: release
+      cancel-in-progress: false
+
     steps:
+      # The full history and all tags, since we compare against the previous release.
       - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
       - name: Resolve the exim version
         id: exim
         run: |
           version="$(bin/resolve-exim-version.sh)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Determine the next tag
+        id: tag
+        env:
+          EXIM_VERSION: ${{ steps.exim.outputs.version }}
+        run: |
+          tag="$(bin/compute-next-tag.sh "$EXIM_VERSION")"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      # Pushes to main always refresh `latest`.
+      # Scheduled runs only build when there is something to release.
+      - name: Decide whether to build
+        id: build
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          if [ "$EVENT_NAME" = 'schedule' ] && [ -z "$TAG" ]; then
+            echo 'Nothing to release'
+            echo 'needed=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'needed=true' >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Docker Buildx
+        if: steps.build.outputs.needed == 'true'
         uses: docker/setup-buildx-action@v4.4.1
+
+      # Smoke-test before publishing anything.
+      - name: Build for the local platform
+        if: steps.build.outputs.needed == 'true'
+        uses: docker/build-push-action@v7.4.0
+        with:
+          load: true
+          tags: exim-relay:release
+          context: .
+          file: ./Dockerfile
+          build-args: |
+            EXIM_VERSION=${{ steps.exim.outputs.version }}
+
+      - name: Smoke-test
+        if: steps.build.outputs.needed == 'true'
+        run: ./bin/smoke-test.sh exim-relay:release
+
       - name: Login to ghcr.io
+        if: steps.build.outputs.needed == 'true'
         uses: docker/login-action@v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Extract metadata (tags, labels) for Docker
+        if: steps.build.outputs.needed == 'true'
         id: meta
         uses: docker/metadata-action@v6.2.0
         with:
           images: |
             ghcr.io/${{ github.repository }}
+          # The first enabled tag becomes the `org.opencontainers.image.version` label.
           tags: |
-            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
-            type=semver,pattern={{raw}}
+            type=raw,value=${{ steps.tag.outputs.tag }},enable=${{ steps.tag.outputs.tag != '' }}
+            type=raw,value=latest
+
       - name: Build and push
+        if: steps.build.outputs.needed == 'true'
         uses: docker/build-push-action@v7.4.0
         with:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
@@ -45,3 +112,15 @@ jobs:
           file: ./Dockerfile
           build-args: |
             EXIM_VERSION=${{ steps.exim.outputs.version }}
+
+      # Only after the image got published, since consumers (Renovate) watch
+      # for new tags. Tags pushed with GITHUB_TOKEN do not trigger workflow runs.
+      - name: Create and push the tag
+        if: steps.tag.outputs.tag != ''
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git tag "$TAG"
+          git push origin "refs/tags/$TAG"
