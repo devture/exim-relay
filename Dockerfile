@@ -1,6 +1,11 @@
 FROM docker.io/alpine:3.24.2
 
-RUN apk --no-cache add exim tini && \
+# The exact `exim` package version to install (e.g. `4.99.5-r0`), as printed by `bin/resolve-exim-version.sh`.
+# CI always passes it, so that the image tag can be determined before building.
+# Left empty, the latest available version gets installed.
+ARG EXIM_VERSION=
+
+RUN apk --no-cache add "exim${EXIM_VERSION:+=$EXIM_VERSION}" tini && \
     mkdir /var/spool/exim && \
     chmod 777 /var/spool/exim && \
     ln -sf /dev/stdout /var/log/exim/mainlog && \

@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve the exim version
+        id: exim
+        run: |
+          version="$(bin/resolve-exim-version.sh)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to ghcr.io
@@ -38,3 +43,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           context: .
           file: ./Dockerfile
+          build-args: |
+            EXIM_VERSION=${{ steps.exim.outputs.version }}
