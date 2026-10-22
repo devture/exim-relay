@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.24.2
+FROM docker.io/alpine:3.24.3
 
 # The exact `exim` package version to install (e.g. `4.99.5-r0`), as printed by `bin/resolve-exim-version.sh`.
 # CI always passes it, so that the image tag can be determined before building.
