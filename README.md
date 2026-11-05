@@ -92,6 +92,77 @@ docker run \
 
 You can adjust the [DKIM selector](https://dmarcly.com/blog/what-is-dkim-selector-and-how-does-it-work-dkim-selector-explained) value by passing an additional `DKIM_SELECTOR` environment variable. By default, it has a value of `default`.
 
+### Inbound SMTP AUTH and TLS (some clients log in, others don't)
+
+By default, any client in `RELAY_FROM_HOSTS` can relay **without** logging in (the default covers all private ranges).
+Clients outside that list are rejected, unless they authenticate via SMTP AUTH (`LOGIN` / `PLAIN`).
+
+To let some networks send without a password and require a login from everyone else:
+
+1. Restrict `RELAY_FROM_HOSTS` to the networks that may send without logging in.
+2. Provide a users file (`AUTH_USERS_FILE`) with `username:hash` lines.
+3. Provide a TLS certificate and key (`TLS_CERT_FILE` / `TLS_KEY_FILE`). By default, AUTH is only offered over TLS (STARTTLS).
+
+Generate a password hash (any `crypt(3)` hash supported by musl works, e.g. SHA-512):
+
+```
+docker run --rm -it alpine sh -c 'apk add --no-cache -q openssl && openssl passwd -6'
+```
+
+Users file:
+
+```
+smtpuser:$6$salt$hash...
+```
+
+Docker example:
+
+```
+docker secret create EXIM_USERS ./exim_users
+docker secret create TLS_CERT ./fullchain.pem
+docker secret create TLS_KEY ./privkey.pem
+
+docker service create --name exim-relay --mode global \
+  --publish mode=host,target=8025,published=25 \
+  --secret source=EXIM_USERS,target=EXIM_USERS,uid=100,gid=101,mode=0400 \
+  --secret source=TLS_CERT,target=TLS_CERT,uid=100,gid=101,mode=0444 \
+  --secret source=TLS_KEY,target=TLS_KEY,uid=100,gid=101,mode=0400 \
+  -e TLS_CERT_FILE=/run/secrets/TLS_CERT \
+  -e TLS_KEY_FILE=/run/secrets/TLS_KEY \
+  -e HOSTNAME=my.host.name \
+  -e RELAY_FROM_HOSTS="<; 10.10.0.0/16; 192.168.50.0/24" \
+  ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
+```
+
+Docker run example (bind mounts):
+
+```
+docker run \
+       --user=100:101 \
+       -d -p 25:8025 \
+       -e HOSTNAME=my.host.name \
+       -e RELAY_FROM_HOSTS="<; 10.10.0.0/16" \
+       --mount type=bind,src=/PATH/TO/exim_users,dst=/run/secrets/EXIM_USERS,ro \
+       --mount type=bind,src=/PATH/TO/fullchain.pem,dst=/etc/exim/tls/tls.crt,ro \
+       --mount type=bind,src=/PATH/TO/privkey.pem,dst=/etc/exim/tls/tls.key,ro \
+       ghcr.io/devture/exim-relay:SOME_TAGGED_RELEASE
+```
+
+Test (from a network that is **not** in `RELAY_FROM_HOSTS`):
+
+```
+swaks --server HOST --to someone@example.com --from me@example.com --tls --auth LOGIN --auth-user smtpuser --auth-password 'PASSWORD'
+```
+
+Notes:
+
+* If the certificate or key file does not exist, STARTTLS is not offered (and neither is AUTH, unless `AUTH_ALLOW_INSECURE=yes`).
+* If the users file does not exist, SMTP AUTH is not offered.
+* Authenticated clients may relay to any recipient domain (`RELAY_TO_DOMAINS` only applies to hosts in `RELAY_FROM_HOSTS`).
+* The certificate file should contain the full chain. Certificate and key must be readable by the `exim` user (`uid=100`).
+* Docker secrets and configs are immutable: to rotate a certificate or the users file, create a new secret and update the service.
+* Use `mode=host` when publishing the port in Swarm, otherwise the source IP is lost and `RELAY_FROM_HOSTS` cannot match client addresses.
+
 ## Docker Compose
 
 ```
@@ -144,6 +215,23 @@ services:
 * This list is processed in addition to the domains in RELAY_TO_DOMAINS
 * Use this for more precise whitelisting of relayable mail
 * Defaults to "" which doesn't whitelist any addresses
+
+###### TLS_CERT_FILE / TLS_KEY_FILE
+
+* Paths to the server certificate (full chain) and private key used for inbound TLS (STARTTLS)
+* Defaults: `/etc/exim/tls/tls.crt` and `/etc/exim/tls/tls.key`
+* If either file is missing, TLS is not offered to clients
+
+###### AUTH_USERS_FILE
+
+* Path to a file with `username:hash` lines (`crypt(3)` hashes, e.g. `openssl passwd -6`) used for inbound SMTP AUTH (`LOGIN` / `PLAIN`)
+* Default: `/run/secrets/EXIM_USERS` (a Docker secret named `EXIM_USERS`)
+* If the file is missing, inbound SMTP AUTH is disabled
+
+###### AUTH_ALLOW_INSECURE
+
+* Set to `yes` to allow SMTP AUTH without TLS (credentials travel in plaintext - not recommended)
+* Defaults to `no`: AUTH is only offered after STARTTLS
 
 ###### DISABLE_SENDER_VERIFICATION
 

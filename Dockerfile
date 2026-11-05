@@ -34,7 +34,11 @@ ENV LOCAL_DOMAINS=@ \
     SMARTHOST= \
     SMTP_PASSWORD= \
     SMTP_USERDOMAIN= \
-    SMTP_USERNAME=
+    SMTP_USERNAME= \
+    TLS_CERT_FILE=/etc/exim/tls/tls.crt \
+    TLS_KEY_FILE=/etc/exim/tls/tls.key \
+    AUTH_USERS_FILE=/run/secrets/EXIM_USERS \
+    AUTH_ALLOW_INSECURE=no
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["exim", "-bdf", "-q15m"]
