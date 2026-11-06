@@ -16,7 +16,7 @@ jobs:
       - name: Resolve the exim version
         id: exim
         run: |
-          version="$(bin/resolve-exim-version.sh)"
+          version="$(bash ./bin/resolve-exim-version.sh)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.4.1
@@ -41,4 +41,6 @@ jobs:
           build-args: |
             EXIM_VERSION=${{ steps.exim.outputs.version }}
       - name: Smoke-test
-        run: ./bin/smoke-test.sh exim-relay:check
+        run: bash ./bin/smoke-test.sh exim-relay:check
+      - name: Test inbound TLS and SMTP AUTH
+        run: bash ./bin/test-auth.sh exim-relay:check

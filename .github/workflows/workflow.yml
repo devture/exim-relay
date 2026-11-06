@@ -34,7 +34,7 @@ jobs:
       - name: Resolve the exim version
         id: exim
         run: |
-          version="$(bin/resolve-exim-version.sh)"
+          version="$(bash ./bin/resolve-exim-version.sh)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Determine the next tag
@@ -42,7 +42,7 @@ jobs:
         env:
           EXIM_VERSION: ${{ steps.exim.outputs.version }}
         run: |
-          tag="$(bin/compute-next-tag.sh "$EXIM_VERSION")"
+          tag="$(bash ./bin/compute-next-tag.sh "$EXIM_VERSION")"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       # Pushes to main always refresh `latest`.
@@ -78,7 +78,11 @@ jobs:
 
       - name: Smoke-test
         if: steps.build.outputs.needed == 'true'
-        run: ./bin/smoke-test.sh exim-relay:release
+        run: bash ./bin/smoke-test.sh exim-relay:release
+
+      - name: Test inbound TLS and SMTP AUTH
+        if: steps.build.outputs.needed == 'true'
+        run: bash ./bin/test-auth.sh exim-relay:release
 
       - name: Login to ghcr.io
         if: steps.build.outputs.needed == 'true'
