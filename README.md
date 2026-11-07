@@ -225,6 +225,7 @@ services:
 ###### AUTH_USERS_FILE
 
 * Path to a file with `username:hash` lines (`crypt(3)` hashes, e.g. `openssl passwd -6`) used for inbound SMTP AUTH (`LOGIN` / `PLAIN`)
+* Usernames are matched case-insensitively; names that differ only in letter case refer to the same account
 * Default: `/run/secrets/EXIM_USERS` (a Docker secret named `EXIM_USERS`)
 * If the file is missing, inbound SMTP AUTH is disabled
 
