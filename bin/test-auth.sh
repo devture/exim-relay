@@ -25,10 +25,10 @@ openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=localhost" \
 printf 'smtpuser:%s\n' "$(openssl passwd -6 'S3cret')" > "$TMP/test.users"
 chmod 644 "$TMP"/test.*   # must be readable by the (non-root) exim user
 
-# start SCENARIO_FILES RELAY_FROM_HOSTS
-#   SCENARIO_FILES: space separated subset of "cert users"
+# start SCENARIO_FILES RELAY_FROM_HOSTS [AUTH_ALLOW_INSECURE]
+#   SCENARIO_FILES: space separated subset of "cert key users"
 start() {
-  files="$1"; relay="$2"
+  local files="$1" relay="$2" insecure="${3:-no}" f
   docker rm -f "$NAME" >/dev/null 2>&1 || true
   docker create --name "$NAME" \
     -e HOSTNAME=relay.test \
@@ -38,11 +38,12 @@ start() {
     -e TLS_CERT_FILE=/etc/exim/test.crt \
     -e TLS_KEY_FILE=/etc/exim/test.key \
     -e AUTH_USERS_FILE=/etc/exim/test.users \
+    -e AUTH_ALLOW_INSECURE="$insecure" \
     "$IMAGE" >/dev/null
   for f in $files; do
     case "$f" in
-      cert)  docker cp "$TMP/test.crt" "$NAME:/etc/exim/test.crt"
-             docker cp "$TMP/test.key" "$NAME:/etc/exim/test.key" ;;
+      cert)  docker cp "$TMP/test.crt" "$NAME:/etc/exim/test.crt" ;;
+      key)   docker cp "$TMP/test.key" "$NAME:/etc/exim/test.key" ;;
       users) docker cp "$TMP/test.users" "$NAME:/etc/exim/test.users" ;;
     esac
   done
@@ -59,14 +60,17 @@ run_check() {
   fi
 }
 
-# Recipient verification runs before the relay rules, so it must not need DNS:
-# with SMARTHOST set (a TEST-NET address, never contacted), routing succeeds
-# offline. Without it, exim would do an MX lookup of the recipient domain
-# (example.com publishes a null MX, so the RCPT would be refused).
+# Route recipient verification through a TEST-NET smarthost so these RCPT
+# checks do not need DNS. No DATA is sent, so no delivery is attempted.
 # The client connects from 127.0.0.1 (shared network namespace).
-start "cert users" "<; 127.0.0.0/8";   run_check trusted
-start "cert users" "<; 203.0.113.0/24"; run_check untrusted
-start "cert"       "<; 203.0.113.0/24"; run_check noauth
-start ""           "<; 203.0.113.0/24"; run_check notls
+start ""               "<; 127.0.0.0/8";   run_check trusted
+start "cert key users" "<; 127.0.0.0/8";   run_check trusted
+start "cert key users" "<; 203.0.113.0/24"; run_check untrusted
+start "cert key"       "<; 203.0.113.0/24"; run_check noauth
+start "users"          "<; 203.0.113.0/24"; run_check notls
+start "cert users"     "<; 203.0.113.0/24"; run_check notls
+start "key users"      "<; 203.0.113.0/24"; run_check notls
+start "users"          "<; 203.0.113.0/24" yes; run_check insecure
+start ""               "<; 203.0.113.0/24" yes; run_check notls
 
 echo "All auth/TLS checks passed"
