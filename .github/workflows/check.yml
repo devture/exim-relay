@@ -42,3 +42,5 @@ jobs:
             EXIM_VERSION=${{ steps.exim.outputs.version }}
       - name: Smoke-test
         run: ./bin/smoke-test.sh exim-relay:check
+      - name: Test inbound TLS and SMTP AUTH
+        run: ./bin/test-auth.sh exim-relay:check

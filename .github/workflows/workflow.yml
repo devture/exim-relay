@@ -80,6 +80,10 @@ jobs:
         if: steps.build.outputs.needed == 'true'
         run: ./bin/smoke-test.sh exim-relay:release
 
+      - name: Test inbound TLS and SMTP AUTH
+        if: steps.build.outputs.needed == 'true'
+        run: ./bin/test-auth.sh exim-relay:release
+
       - name: Login to ghcr.io
         if: steps.build.outputs.needed == 'true'
         uses: docker/login-action@v4.6.0
